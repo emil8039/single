@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Persongalleri</title>
+    <style>
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 20px;
+      }
+
+      article {
+        border: 1px solid orange;
+        padding: 10px;
+        border-radius: 25px;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      header nav {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .valgt {
+        background-color: red;
+      }
+
+      #popup {
+        width: 100vw;
+        height: 100vh;
+        background-color: #00000099;
+        position: fixed;
+        top: 0;
+        padding: 2em;
+        display: none;
+      }
+
+      #popup article {
+        background-color: white;
+        width: 85%;
+        /* display: flex; */
+      }
+
+      #popup img {
+        max-width: 50%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Alle</h1>
+      <nav>
+        <button data-troende="alle" class="valgt">Alle</button>
+        <button data-troende="ja" class="">Troende</button>
+        <button data-troende="nej" class="">Ikke troende</button>
+        <button data-troende="tvivler" class="">Tvivler</button>
+      </nav>
+    </header>
+
+    <h2>Persongalleri</h2>
+    <main id="liste"></main>
+
+    <template>
+      <article>
+        <h2 class="navn"></h2>
+        <img src="" alt="" class="billede" />
+        <p class="titel"></p>
+        <p class="fødselsdag"></p>
+      </article>
+    </template>
+
+    <section id="popup">
+      <button>X</button>
+      <article>
+        <img src="" alt="" class="billede" />
+        <h2 class="navn"></h2>
+        <p class="titel"></p>
+        <p class="fødselsdag"></p>
+      </article>
+    </section>
+
+    <script>
+      const url = "https://persongalleri-5d3e.restdb.io/rest/persongalleri";
+      let personer;
+      let filter = "ja";
+      const main = document.querySelector("main");
+
+      const options = {
+        headers: {
+          "x-apikey": "600fe9211346a1524ff12e31",
+        },
+      };
+
+      document.addEventListener("DOMContentLoaded", start);
+
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) =>
+          knap.addEventListener("click", filtrerPersoner)
+        );
+        hentdata();
+      }
+
+      function filtrerPersoner(event) {
+        const header = document.querySelector("header h1");
+        document.querySelector(".valgt").classList.remove("valgt");
+        this.classList.add("valgt");
+        console.log(event.target.getAttribute("data-troende"));
+        filter = this.dataset.troende;
+        vis();
+        header.textContent = this.textContent;
+      }
+
+      async function hentdata() {
+        const response = await fetch(url, options);
+        const json = await response.json();
+        personer = json;
+        vis();
+      }
+
+      function vis() {
+        const dest = document.querySelector("#liste");
+        const template = document.querySelector("template").content;
+
+        dest.textContent = "";
+        console.log("Personerne er: " + filter);
+        personer.forEach((person) => {
+          if (person.troende == filter || filter == "alle") {
+            const klon = template.cloneNode(true);
+            klon.querySelector(".navn").textContent =
+              person.fornavn + " " + person.efternavn;
+            klon.querySelector(".billede").src = "faces/" + person.billede;
+            klon.querySelector(".billede").alt = "person.billede";
+            klon.querySelector(".titel").textContent = person.titel;
+            klon.querySelector(".fødselsdag").textContent = person.fødselsdag;
+
+            klon
+              .querySelector("article")
+              .addEventListener("click", () => visDetaljer(person));
+            main.appendChild(klon);
+          }
+        });
+      }
+
+      document
+        .querySelector("#popup button")
+        .addEventListener("click", lukPopup);
+
+      function lukPopup() {
+        document.querySelector("#popup").style.display = "none";
+      }
+
+      function visDetaljer(detaljer) {
+        const popup = document.querySelector("#popup");
+        popup.style.display = "block";
+        popup.querySelector(".navn").textContent = detaljer.fornavn;
+        popup.querySelector("#popup img").src = "faces/" + detaljer.billede;
+        popup.querySelector(".titel").textContent = detaljer.titel;
+        popup.querySelector(".fødselsdag").textContent = detaljer.fødselsdag;
+        console.log(detaljer);
+      }
+    </script>
+  </body>
+</html>
