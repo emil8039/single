@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    article {
+      margin-left: 10vw;
+      margin-right: 10vw;
+      padding: 2vw;
+      display: grid;
+      place-items: center;
+      border: 3px solid orange;
+      border-radius: 25px;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  </style>
+  <body>
+    <button>Tilbage</button>
+    <article>
+      <h2 class="navn"></h2>
+      <img src="" alt="" class="billede" />
+      <p class="titel"></p>
+      <p class="fødselsdag"></p>
+    </article>
+  </body>
+</html>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+  let json;
+  const url = "https://persongalleri-5d3e.restdb.io/rest/persongalleri/";
+  const options = {
+    headers: {
+      "x-apikey": "600fe9211346a1524ff12e31",
+    },
+  };
+  document.addEventListener("DOMContentLoaded", hentdata);
+
+  async function hentdata() {
+    const response = await fetch(url + id, options);
+    const json = await response.json();
+    personer = json;
+    console.log(json);
+    visPerson();
+
+    function visPerson() {
+      document.querySelector(".navn").textContent = json.fornavn;
+      document.querySelector(".billede").src = "faces/" + json.billede;
+      document.querySelector(".titel").textContent = json.titel;
+      document.querySelector(".fødselsdag").textContent = json.fødselsdag;
+    }
+
+    document.querySelector("button").addEventListener("click", () => {
+      window.history.back();
+    });
+  }
+
+  //   console.log(id);
+</script>
